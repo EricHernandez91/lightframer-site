@@ -21,7 +21,7 @@
             flex-shrink: 0;
         }
 
-        /* Phone mockup */
+        /* Phone mockup — PORTRAIT (default) */
         .phone {
             width: 240px;
             height: 500px;
@@ -45,6 +45,33 @@
             position: absolute;
             top: 3px; left: 3px; right: 3px; bottom: 3px;
             border-radius: 25px;
+            overflow: hidden;
+            background: #0D0D0D;
+        }
+        /* Phone mockup — LANDSCAPE */
+        .phone-landscape {
+            width: 380px;
+            height: 190px;
+            background: #0D0D0D;
+            border-radius: 20px;
+            border: 3px solid #333;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+        }
+        .phone-landscape .phone-notch {
+            width: 18px; height: 70px;
+            background: #000;
+            border-radius: 0 10px 10px 0;
+            position: absolute;
+            left: 0; top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+        }
+        .phone-landscape .phone-screen {
+            position: absolute;
+            top: 3px; left: 3px; right: 3px; bottom: 3px;
+            border-radius: 17px;
             overflow: hidden;
             background: #0D0D0D;
         }
@@ -251,7 +278,7 @@
         .ss3 .headline { font-size: 34px; color: #fff; }
         .ss3 .headline .accent { color: #D4A574; }
         .ss3 .sub-headline { font-size: 15px; color: #A0A0A0; margin-top: 10px; }
-        .ss3 .phone-wrap { display: flex; justify-content: center; margin-top: 24px; }
+        .ss3 .phone-wrap { display: flex; justify-content: center; margin-top: 20px; }
         .ratio-grid {
             display: grid; grid-template-columns: 1fr 1fr;
             gap: 6px; padding: 10px;
@@ -293,7 +320,7 @@
         .ss4 .headline { font-size: 36px; color: #fff; }
         .ss4 .headline .accent { color: #E8C59B; }
         .ss4 .sub-headline { font-size: 15px; color: #A0A0A0; margin-top: 10px; }
-        .ss4 .phone-wrap { display: flex; justify-content: center; margin-top: 24px; position: relative; z-index: 2; }
+        .ss4 .phone-wrap { display: flex; justify-content: center; margin-top: 20px; position: relative; z-index: 2; }
         .ss4 .glow-sun {
             position: absolute;
             width: 400px; height: 400px;
@@ -400,7 +427,7 @@
         .ss6 .headline { font-size: 34px; color: #fff; }
         .ss6 .headline .accent { color: #D4A574; }
         .ss6 .sub-headline { font-size: 15px; color: #A0A0A0; margin-top: 10px; }
-        .ss6 .phone-wrap { display: flex; justify-content: center; margin-top: 24px; }
+        .ss6 .phone-wrap { display: flex; justify-content: center; margin-top: 20px; }
         .export-mock {
             width: 100%; height: 100%;
             background: #0D0D0D;
@@ -482,55 +509,46 @@
             <div class="content">
                 <div class="headline">Your Cinema<br>Viewfinder with<br><span class="accent">Sun Tracking</span></div>
                 <div class="sub-headline">See what your camera sees —<br>with the sun's path in real time.</div>
-                <div class="phone-wrap">
-                    <div class="phone">
+                <div class="badge badge-amber">LANDSCAPE · PORTRAIT</div>
+                <div class="phone-wrap" style="margin-top:20px;">
+                    <div class="phone-landscape">
                         <div class="phone-notch"></div>
                         <div class="phone-screen">
-                            <div class="vf-mock">
-                                <div class="camera-feed">
-                                    <div class="hud-top">
-                                        <span>ARRI ALEXA 35 · 4.6K S35</span>
-                                        <span>N 247°</span>
+                            <div style="width:100%;height:100%;background:#0a0a0a;position:relative;overflow:hidden;">
+                                <!-- Full landscape viewfinder -->
+                                <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#1a2a1a 0%,#0f1a10 40%,#1a2510 100%);"></div>
+                                <!-- Top HUD bar -->
+                                <div style="position:absolute;top:0;left:0;right:0;padding:5px 12px;background:linear-gradient(to bottom,rgba(0,0,0,0.9),transparent);display:flex;justify-content:space-between;align-items:flex-start;font-family:'JetBrains Mono',monospace;z-index:5;">
+                                    <div style="display:flex;gap:8px;align-items:center;">
+                                        <div><div style="font-size:6px;font-weight:700;color:#fff;">ARRI ALEXA 35</div><div style="font-size:5px;color:#8A8A8A;">4.6K S35 OPEN GATE</div></div>
+                                        <div style="width:1px;height:16px;background:rgba(255,255,255,0.15);"></div>
+                                        <div><div style="font-size:6px;font-weight:700;color:#D4A574;">COOKE S7/i</div><div style="font-size:5px;color:#8A8A8A;">8 PRIMES · T2.0</div></div>
+                                        <div style="width:1px;height:16px;background:rgba(255,255,255,0.15);"></div>
+                                        <div><div style="font-size:6px;font-weight:700;color:#fff;">2.39:1</div><div style="font-size:5px;color:#8A8A8A;">4K DCI</div></div>
+                                        <div style="width:1px;height:16px;background:rgba(255,255,255,0.15);"></div>
+                                        <div style="background:rgba(201,168,108,0.15);padding:2px 5px;border-radius:3px;"><span style="font-size:5px;font-weight:700;color:#C9A86C;">☀ GOLDEN</span></div>
+                                        <div><span style="font-size:5px;color:#8A8A8A;">↑6:42a</span> <span style="font-size:5px;color:#8A8A8A;">↓6:14p</span></div>
+                                        <div style="background:rgba(212,165,116,0.14);padding:2px 5px;border-radius:3px;"><span style="font-size:5px;font-weight:700;color:#D4A574;">WB 5600K</span></div>
                                     </div>
-                                    <div class="frame-lines"></div>
-                                    <div class="sun-arc-mock">
-                                        <svg viewBox="0 0 200 100">
-                                            <path d="M 10 90 Q 100 -10 190 90" stroke="#D4A574" stroke-width="1" fill="none" opacity="0.3" stroke-dasharray="3 4"/>
-                                            <circle cx="130" cy="25" r="6" fill="#E8C59B" opacity="0.9"/>
-                                            <circle cx="130" cy="25" r="14" fill="#E8C59B" opacity="0.1"/>
-                                        </svg>
-                                    </div>
-                                    <div class="hud-bottom">
-                                        <div>
-                                            <div style="font-size:5px;color:#D4A574;">COOKE S7/i</div>
-                                            <div class="focal-big">32<span style="font-size:10px;opacity:0.5;">mm</span></div>
-                                        </div>
-                                        <div style="text-align:right;">
-                                            <div style="font-size:5px;color:#C9A86C;">GOLDEN HOUR</div>
-                                            <div style="font-size:9px;color:#E8C59B;">☀️ 5:42 PM</div>
-                                        </div>
-                                    </div>
+                                    <div style="font-size:6px;color:#fff;font-weight:600;">N 247°</div>
                                 </div>
-                                <div class="bottom-bar">
-                                    <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:6px;color:#8A8A8A;margin-bottom:4px;">
-                                        <span>6AM</span><span>9AM</span><span>12PM</span><span>3PM</span><span>6PM</span><span>9PM</span>
-                                    </div>
-                                    <div class="scrubber-mock">
-                                        <div class="scrubber-handle"></div>
-                                    </div>
-                                    <div style="display:flex;gap:4px;margin-top:8px;">
-                                        <div style="flex:1;background:#1A1A1A;border-radius:6px;padding:5px;text-align:center;">
-                                            <div style="font-size:5px;color:#8A8A8A;font-family:'JetBrains Mono',monospace;">SUNRISE</div>
-                                            <div style="font-size:9px;color:#E8C59B;font-family:'JetBrains Mono',monospace;font-weight:700;">6:42a</div>
-                                        </div>
-                                        <div style="flex:1;background:#1A1A1A;border-radius:6px;padding:5px;text-align:center;">
-                                            <div style="font-size:5px;color:#8A8A8A;font-family:'JetBrains Mono',monospace;">GOLDEN</div>
-                                            <div style="font-size:9px;color:#C9A86C;font-family:'JetBrains Mono',monospace;font-weight:700;">5:18p</div>
-                                        </div>
-                                        <div style="flex:1;background:#1A1A1A;border-radius:6px;padding:5px;text-align:center;">
-                                            <div style="font-size:5px;color:#8A8A8A;font-family:'JetBrains Mono',monospace;">SUNSET</div>
-                                            <div style="font-size:9px;color:#CC4444;font-family:'JetBrains Mono',monospace;font-weight:700;">6:14p</div>
-                                        </div>
+                                <!-- Frame lines -->
+                                <div style="position:absolute;top:22%;left:8%;right:8%;bottom:22%;border:1.5px solid rgba(212,165,116,0.35);"></div>
+                                <!-- Sun arc -->
+                                <svg viewBox="0 0 380 180" style="position:absolute;top:0;left:0;width:100%;height:100%;">
+                                    <path d="M 30 160 Q 190 -20 350 160" stroke="#D4A574" stroke-width="0.6" fill="none" opacity="0.2" stroke-dasharray="3 4"/>
+                                    <circle cx="240" cy="40" r="5" fill="#E8C59B" opacity="0.8"/>
+                                    <circle cx="240" cy="40" r="14" fill="#E8C59B" opacity="0.06"/>
+                                </svg>
+                                <!-- Focal length -->
+                                <div style="position:absolute;bottom:8px;left:12px;font-family:'JetBrains Mono',monospace;">
+                                    <span style="font-size:18px;font-weight:700;color:#D4A574;">32</span><span style="font-size:8px;color:rgba(255,255,255,0.4);">mm</span>
+                                </div>
+                                <!-- Capture button -->
+                                <div style="position:absolute;bottom:6px;right:12px;display:flex;align-items:center;gap:6px;">
+                                    <div style="width:8px;height:8px;border-radius:50%;background:#6B8F6B;"></div>
+                                    <div style="width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;">
+                                        <div style="width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.1);"></div>
                                     </div>
                                 </div>
                             </div>
@@ -556,77 +574,31 @@
                         <div class="stat-label">Lens Series</div>
                     </div>
                 </div>
-                <div class="phone-wrap">
-                    <div class="phone">
+                <div class="phone-wrap" style="margin-top:20px;">
+                    <div class="phone-landscape">
                         <div class="phone-notch"></div>
                         <div class="phone-screen">
-                            <div class="cam-list">
-                                <div class="cam-brand">ARRI</div>
-                                <div class="cam-item selected">
-                                    <span class="cam-name">ALEXA 35</span>
-                                    <span class="cam-spec">4.6K · S35</span>
+                            <div style="width:100%;height:100%;display:flex;overflow:hidden;">
+                                <!-- Left: camera list -->
+                                <div style="width:45%;height:100%;overflow:hidden;border-right:1px solid #262626;">
+                                    <div class="cam-list" style="padding:6px;">
+                                        <div class="cam-brand" style="margin-top:2px;">ARRI</div>
+                                        <div class="cam-item selected"><span class="cam-name">ALEXA 35</span><span class="cam-spec">4.6K · S35</span></div>
+                                        <div class="cam-item"><span class="cam-name">ALEXA Mini LF</span><span class="cam-spec">4.5K · LF</span></div>
+                                        <div class="cam-item"><span class="cam-name">AMIRA</span><span class="cam-spec">3.2K · S35</span></div>
+                                        <div class="cam-brand">RED</div>
+                                        <div class="cam-item"><span class="cam-name">V-RAPTOR 8K VV</span><span class="cam-spec">8K · VV</span></div>
+                                        <div class="cam-item"><span class="cam-name">KOMODO 6K</span><span class="cam-spec">6K · S35</span></div>
+                                        <div class="cam-brand">SONY</div>
+                                        <div class="cam-item"><span class="cam-name">VENICE 2</span><span class="cam-spec">8.6K · FF</span></div>
+                                    </div>
                                 </div>
-                                <div class="cam-item">
-                                    <span class="cam-name">ALEXA Mini LF</span>
-                                    <span class="cam-spec">4.5K · LF</span>
-                                </div>
-                                <div class="cam-item">
-                                    <span class="cam-name">AMIRA</span>
-                                    <span class="cam-spec">3.2K · S35</span>
-                                </div>
-                                <div class="cam-brand">RED</div>
-                                <div class="cam-item">
-                                    <span class="cam-name">V-RAPTOR 8K VV</span>
-                                    <span class="cam-spec">8K · VV</span>
-                                </div>
-                                <div class="cam-item">
-                                    <span class="cam-name">KOMODO 6K</span>
-                                    <span class="cam-spec">6K · S35</span>
-                                </div>
-                                <div class="cam-item">
-                                    <span class="cam-name">DSMC2 Monstro</span>
-                                    <span class="cam-spec">8K · VV</span>
-                                </div>
-                                <div class="cam-brand">SONY</div>
-                                <div class="cam-item">
-                                    <span class="cam-name">VENICE 2</span>
-                                    <span class="cam-spec">8.6K · FF</span>
-                                </div>
-                                <div class="cam-item">
-                                    <span class="cam-name">FX9</span>
-                                    <span class="cam-spec">6K · FF</span>
-                                </div>
-                                <div class="cam-item">
-                                    <span class="cam-name">FX6</span>
-                                    <span class="cam-spec">4K · FF</span>
-                                </div>
-                                <div class="cam-brand">BLACKMAGIC</div>
-                                <div class="cam-item">
-                                    <span class="cam-name">URSA Mini Pro 12K</span>
-                                    <span class="cam-spec">12K · S35</span>
-                                </div>
-                                <div class="cam-item">
-                                    <span class="cam-name">Pocket 6K Pro</span>
-                                    <span class="cam-spec">6K · S35</span>
-                                </div>
-                                <div class="cam-brand">CANON</div>
-                                <div class="cam-item">
-                                    <span class="cam-name">C500 Mark II</span>
-                                    <span class="cam-spec">5.9K · FF</span>
-                                </div>
-                                <div class="cam-item">
-                                    <span class="cam-name">C300 Mark III</span>
-                                    <span class="cam-spec">4K · S35</span>
-                                </div>
-                                <div class="cam-brand">PANASONIC</div>
-                                <div class="cam-item">
-                                    <span class="cam-name">VariCam LT</span>
-                                    <span class="cam-spec">4K · S35</span>
-                                </div>
-                                <div class="cam-brand">DJI</div>
-                                <div class="cam-item">
-                                    <span class="cam-name">Ronin 4D 8K</span>
-                                    <span class="cam-spec">8K · FF</span>
+                                <!-- Right: viewfinder preview -->
+                                <div style="width:55%;height:100%;background:linear-gradient(135deg,#1a2a1a,#0f1a10,#1a2510);position:relative;">
+                                    <div style="position:absolute;top:12%;left:6%;right:6%;bottom:12%;border:1.5px solid rgba(212,165,116,0.35);"></div>
+                                    <div style="position:absolute;top:5px;left:6px;font-family:'JetBrains Mono',monospace;font-size:6px;font-weight:700;color:#D4A574;">ALEXA 35 · S7/i 32mm</div>
+                                    <div style="position:absolute;bottom:5px;right:6px;font-family:'JetBrains Mono',monospace;font-size:5px;color:#8A8A8A;">2.39:1 · 4K DCI</div>
+                                    <svg viewBox="0 0 200 100" style="position:absolute;top:0;left:0;width:100%;height:100%;"><path d="M 20 90 Q 100 0 180 90" stroke="#D4A574" stroke-width="0.5" fill="none" opacity="0.15" stroke-dasharray="3 4"/><circle cx="120" cy="25" r="4" fill="#E8C59B" opacity="0.5"/></svg>
                                 </div>
                             </div>
                         </div>
@@ -643,10 +615,10 @@
                 <div class="headline">Frame Lines<br>for <span class="accent">Every Ratio</span></div>
                 <div class="sub-headline">From 2.39:1 anamorphic to custom ratios.<br>See your final frame in real time.</div>
                 <div class="phone-wrap">
-                    <div class="phone">
+                    <div class="phone-landscape">
                         <div class="phone-notch"></div>
                         <div class="phone-screen">
-                            <div class="ratio-grid">
+                            <div class="ratio-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;padding:6px;gap:4px;height:100%;">
                                 <div class="ratio-card active">
                                     <div class="ratio-frame"><div class="frame-inner" style="width:90%;height:38px;border-radius:2px;"></div></div>
                                     <div class="ratio-label">2.39 : 1</div>
@@ -703,68 +675,33 @@
                 <div class="headline">Track the Sun<br>Across <span class="accent">the Sky</span></div>
                 <div class="sub-headline">Golden hour, blue hour, sunrise, sunset.<br>Know your light before you arrive.</div>
                 <div class="phone-wrap">
-                    <div class="phone">
+                    <div class="phone-landscape" style="height:220px;">
                         <div class="phone-notch"></div>
                         <div class="phone-screen">
-                            <div class="sun-detail">
-                                <!-- Viewfinder with sun arc -->
-                                <div style="width:100%;height:200px;background:linear-gradient(135deg,#0a1520,#1a1508,#2a1a0a);border-radius:10px;position:relative;overflow:hidden;margin-bottom:8px;">
-                                    <svg viewBox="0 0 220 120" style="width:100%;height:100%;">
-                                        <path d="M 10 110 Q 110 -20 210 110" stroke="#D4A574" stroke-width="0.8" fill="none" opacity="0.25" stroke-dasharray="3 4"/>
-                                        <path d="M 10 110 Q 110 -20 210 110" stroke="#E8C59B" stroke-width="1.5" fill="none" opacity="0.4" stroke-dasharray="300" stroke-dashoffset="120"/>
-                                        <!-- Sun positions -->
-                                        <circle cx="30" cy="85" r="2.5" fill="#E8C59B" opacity="0.3"/>
-                                        <text x="30" y="96" font-size="5" fill="#8A8A8A" text-anchor="middle" font-family="monospace">6a</text>
-                                        <circle cx="70" cy="35" r="2.5" fill="#C9A86C" opacity="0.4"/>
-                                        <text x="70" y="28" font-size="5" fill="#8A8A8A" text-anchor="middle" font-family="monospace">9a</text>
-                                        <circle cx="110" cy="12" r="4" fill="#E8C59B" opacity="0.9"/>
-                                        <circle cx="110" cy="12" r="10" fill="#E8C59B" opacity="0.08"/>
-                                        <text x="110" y="6" font-size="5" fill="#D4A574" text-anchor="middle" font-family="monospace" font-weight="bold">12p</text>
-                                        <circle cx="150" cy="35" r="2.5" fill="#C9A86C" opacity="0.4"/>
-                                        <text x="150" y="28" font-size="5" fill="#8A8A8A" text-anchor="middle" font-family="monospace">3p</text>
-                                        <circle cx="190" cy="85" r="2.5" fill="#CC4444" opacity="0.3"/>
-                                        <text x="190" y="96" font-size="5" fill="#8A8A8A" text-anchor="middle" font-family="monospace">6p</text>
-                                        <!-- Horizon -->
-                                        <line x1="0" y1="110" x2="220" y2="110" stroke="#262626" stroke-width="0.5"/>
+                            <div class="sun-detail" style="display:flex;height:100%;gap:6px;">
+                                <!-- Left: Viewfinder with sun arc -->
+                                <div style="flex:1.4;background:linear-gradient(135deg,#0a1520,#1a1508,#2a1a0a);border-radius:8px;position:relative;overflow:hidden;">
+                                    <svg viewBox="0 0 240 130" style="width:100%;height:100%;">
+                                        <path d="M 10 120 Q 120 -15 230 120" stroke="#D4A574" stroke-width="0.8" fill="none" opacity="0.25" stroke-dasharray="3 4"/>
+                                        <circle cx="30" cy="95" r="2" fill="#E8C59B" opacity="0.3"/><text x="30" y="105" font-size="5" fill="#8A8A8A" text-anchor="middle" font-family="monospace">6a</text>
+                                        <circle cx="75" cy="40" r="2" fill="#C9A86C" opacity="0.4"/><text x="75" y="33" font-size="5" fill="#8A8A8A" text-anchor="middle" font-family="monospace">9a</text>
+                                        <circle cx="120" cy="12" r="4" fill="#E8C59B" opacity="0.9"/><circle cx="120" cy="12" r="10" fill="#E8C59B" opacity="0.08"/><text x="120" y="6" font-size="5" fill="#D4A574" text-anchor="middle" font-family="monospace" font-weight="bold">12p</text>
+                                        <circle cx="165" cy="40" r="2" fill="#C9A86C" opacity="0.4"/><text x="165" y="33" font-size="5" fill="#8A8A8A" text-anchor="middle" font-family="monospace">3p</text>
+                                        <circle cx="210" cy="95" r="2" fill="#CC4444" opacity="0.3"/><text x="210" y="105" font-size="5" fill="#8A8A8A" text-anchor="middle" font-family="monospace">6p</text>
+                                        <line x1="0" y1="120" x2="240" y2="120" stroke="#262626" stroke-width="0.5"/>
                                     </svg>
-                                    <div style="position:absolute;top:8px;left:8px;font-size:6px;color:#C9A86C;font-family:'JetBrains Mono',monospace;font-weight:700;">☀️ GOLDEN HOUR</div>
-                                    <div style="position:absolute;top:8px;right:8px;font-size:6px;color:#8A8A8A;font-family:'JetBrains Mono',monospace;">5600K</div>
+                                    <div style="position:absolute;top:6px;left:6px;font-size:6px;color:#C9A86C;font-family:'JetBrains Mono',monospace;font-weight:700;">☀ GOLDEN HOUR</div>
                                 </div>
-
-                                <div class="sun-phase-bar">
-                                    <div class="phase phase-blue">BLUE</div>
-                                    <div class="phase phase-golden">GOLDEN</div>
-                                    <div class="phase phase-day">DAYLIGHT</div>
-                                    <div class="phase phase-golden">GOLDEN</div>
-                                    <div class="phase phase-blue">BLUE</div>
-                                </div>
-
-                                <div class="sun-info-row">
-                                    <div class="sun-info-card">
-                                        <div class="sic-label">SUNRISE</div>
-                                        <div class="sic-value rise">6:42a</div>
+                                <!-- Right: sun data panel -->
+                                <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
+                                    <div class="sun-phase-bar" style="margin:0;"><div class="phase phase-blue" style="font-size:5px;">BLUE</div><div class="phase phase-golden" style="font-size:5px;">GOLDEN</div><div class="phase phase-day" style="font-size:5px;">DAY</div><div class="phase phase-golden" style="font-size:5px;">GOLDEN</div><div class="phase phase-blue" style="font-size:5px;">BLUE</div></div>
+                                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;flex:1;">
+                                        <div class="sun-info-card"><div class="sic-label">SUNRISE</div><div class="sic-value rise">6:42a</div></div>
+                                        <div class="sun-info-card"><div class="sic-label">GOLDEN HR</div><div class="sic-value golden">5:18p</div></div>
+                                        <div class="sun-info-card"><div class="sic-label">SUNSET</div><div class="sic-value set">6:14p</div></div>
+                                        <div class="sun-info-card"><div class="sic-label">BLUE HR</div><div class="sic-value blue">6:38p</div></div>
                                     </div>
-                                    <div class="sun-info-card">
-                                        <div class="sic-label">GOLDEN HR</div>
-                                        <div class="sic-value golden">5:18p</div>
-                                    </div>
-                                    <div class="sun-info-card">
-                                        <div class="sic-label">SUNSET</div>
-                                        <div class="sic-value set">6:14p</div>
-                                    </div>
-                                    <div class="sun-info-card">
-                                        <div class="sic-label">BLUE HR</div>
-                                        <div class="sic-value blue">6:38p</div>
-                                    </div>
-                                </div>
-
-                                <div style="margin-top:8px;">
-                                    <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:5px;color:#5A5A5A;margin-bottom:3px;">
-                                        <span>5AM</span><span>8AM</span><span>11AM</span><span>2PM</span><span>5PM</span><span>8PM</span>
-                                    </div>
-                                    <div class="scrubber-mock" style="height:30px;">
-                                        <div class="scrubber-handle" style="height:22px;left:55%;"></div>
-                                    </div>
+                                    <div class="scrubber-mock" style="height:24px;flex-shrink:0;"><div class="scrubber-handle" style="height:18px;left:55%;"></div></div>
                                 </div>
                             </div>
                         </div>
@@ -838,51 +775,32 @@
                 <div class="headline">Export with<br>Full <span class="accent">Cinema Data</span></div>
                 <div class="sub-headline">Every capture includes camera, lens,<br>sun position, compass, and white balance.</div>
                 <div class="phone-wrap">
-                    <div class="phone">
+                    <div class="phone-landscape" style="height:230px;">
                         <div class="phone-notch"></div>
                         <div class="phone-screen">
-                            <div class="export-mock">
-                                <div class="export-image">
-                                    <div class="frame-overlay"></div>
-                                    <svg viewBox="0 0 200 120" style="position:absolute;top:0;left:0;width:100%;height:100%;">
-                                        <path d="M 20 100 Q 100 0 180 100" stroke="#D4A574" stroke-width="0.6" fill="none" opacity="0.15" stroke-dasharray="3 4"/>
-                                        <circle cx="130" cy="30" r="4" fill="#E8C59B" opacity="0.5"/>
-                                    </svg>
-                                </div>
-                                <div class="metadata-strip">
-                                    <div style="font-size:7px;font-weight:700;color:#D4A574;margin-bottom:4px;letter-spacing:0.5px;">LIGHTFRAMER PRO</div>
-                                    <div class="meta-row">
-                                        <span class="meta-label">CAMERA</span>
-                                        <span class="meta-value">ARRI ALEXA 35 · 4.6K S35</span>
-                                    </div>
-                                    <div class="meta-row">
-                                        <span class="meta-label">LENS</span>
-                                        <span class="meta-value">Cooke S7/i 32mm T2.0</span>
-                                    </div>
-                                    <div class="meta-row">
-                                        <span class="meta-label">ASPECT</span>
-                                        <span class="meta-value">2.39:1 Anamorphic</span>
-                                    </div>
-                                    <div class="meta-row">
-                                        <span class="meta-label">HEADING</span>
-                                        <span class="meta-value">N 247° · Atlanta, GA</span>
-                                    </div>
-                                    <div class="meta-row">
-                                        <span class="meta-label">SUN</span>
-                                        <span class="meta-value">Golden Hour · ↑6:42a ↓6:14p</span>
-                                    </div>
-                                    <div class="meta-row">
-                                        <span class="meta-label">WHITE BAL</span>
-                                        <span class="meta-value">5600K</span>
-                                    </div>
-                                    <div class="meta-row">
-                                        <span class="meta-label">DATE</span>
-                                        <span class="meta-value">Feb 10, 2026 · 5:32 PM</span>
+                            <div style="width:100%;height:100%;display:flex;overflow:hidden;">
+                                <!-- Left: exported image with frame lines -->
+                                <div style="flex:1.3;background:linear-gradient(135deg,#1a2a1a,#0f1a10,#1a2510);position:relative;">
+                                    <div style="position:absolute;top:14%;left:5%;right:5%;bottom:14%;border:1px solid rgba(212,165,116,0.3);"></div>
+                                    <svg viewBox="0 0 200 120" style="position:absolute;top:0;left:0;width:100%;height:100%;"><path d="M 20 100 Q 100 0 180 100" stroke="#D4A574" stroke-width="0.5" fill="none" opacity="0.12" stroke-dasharray="3 4"/><circle cx="130" cy="28" r="3" fill="#E8C59B" opacity="0.4"/></svg>
+                                    <div style="position:absolute;bottom:4px;left:5px;right:5px;display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:5px;color:rgba(255,255,255,0.4);">
+                                        <span>ARRI ALEXA 35</span><span>S7/i 32mm</span><span>2.39:1</span><span>N 247°</span>
                                     </div>
                                 </div>
-                                <div class="export-actions">
-                                    <div class="export-btn primary">SHARE</div>
-                                    <div class="export-btn secondary">SAVE TO GALLERY</div>
+                                <!-- Right: metadata strip -->
+                                <div style="flex:1;background:#111;border-left:1px solid #262626;padding:6px 8px;font-family:'JetBrains Mono',monospace;overflow:hidden;">
+                                    <div style="font-size:7px;font-weight:700;color:#D4A574;margin-bottom:5px;letter-spacing:0.5px;">LIGHTFRAMER PRO</div>
+                                    <div class="meta-row"><span class="meta-label">CAMERA</span><span class="meta-value">ARRI ALEXA 35 · 4.6K S35</span></div>
+                                    <div class="meta-row"><span class="meta-label">LENS</span><span class="meta-value">Cooke S7/i 32mm T2.0</span></div>
+                                    <div class="meta-row"><span class="meta-label">ASPECT</span><span class="meta-value">2.39:1 Anamorphic</span></div>
+                                    <div class="meta-row"><span class="meta-label">HEADING</span><span class="meta-value">N 247° · Atlanta, GA</span></div>
+                                    <div class="meta-row"><span class="meta-label">SUN</span><span class="meta-value">Golden Hour · ↑6:42a ↓6:14p</span></div>
+                                    <div class="meta-row"><span class="meta-label">WHITE BAL</span><span class="meta-value">5600K</span></div>
+                                    <div class="meta-row"><span class="meta-label">DATE</span><span class="meta-value">Feb 10, 2026 · 5:32 PM</span></div>
+                                    <div style="display:flex;gap:4px;margin-top:8px;">
+                                        <div class="export-btn primary" style="flex:1;height:22px;font-size:6px;border-radius:4px;">SHARE</div>
+                                        <div class="export-btn secondary" style="flex:1;height:22px;font-size:6px;border-radius:4px;">SAVE</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
