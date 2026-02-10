@@ -37,7 +37,8 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            padding: 40px 28px 32px;
+            /* IG safe zones: top ~14% (100px), bottom ~20% (144px) */
+            padding: 110px 28px 150px;
         }
 
         .mono { font-family: 'JetBrains Mono', monospace; }
@@ -157,10 +158,10 @@
 
         /* Corner brackets */
         .bracket { position: absolute; width: 24px; height: 24px; z-index: 3; }
-        .bracket.tl { top: 28px; left: 20px; border-top: 2px solid rgba(212,165,116,0.2); border-left: 2px solid rgba(212,165,116,0.2); }
-        .bracket.tr { top: 28px; right: 20px; border-top: 2px solid rgba(212,165,116,0.2); border-right: 2px solid rgba(212,165,116,0.2); }
-        .bracket.bl { bottom: 20px; left: 20px; border-bottom: 2px solid rgba(212,165,116,0.2); border-left: 2px solid rgba(212,165,116,0.2); }
-        .bracket.br { bottom: 20px; right: 20px; border-bottom: 2px solid rgba(212,165,116,0.2); border-right: 2px solid rgba(212,165,116,0.2); }
+        .bracket.tl { top: 100px; left: 20px; border-top: 2px solid rgba(212,165,116,0.2); border-left: 2px solid rgba(212,165,116,0.2); }
+        .bracket.tr { top: 100px; right: 20px; border-top: 2px solid rgba(212,165,116,0.2); border-right: 2px solid rgba(212,165,116,0.2); }
+        .bracket.bl { bottom: 142px; left: 20px; border-bottom: 2px solid rgba(212,165,116,0.2); border-left: 2px solid rgba(212,165,116,0.2); }
+        .bracket.br { bottom: 142px; right: 20px; border-bottom: 2px solid rgba(212,165,116,0.2); border-right: 2px solid rgba(212,165,116,0.2); }
 
         /* Viewfinder frame lines behind sun arc */
         .vf-lines {
