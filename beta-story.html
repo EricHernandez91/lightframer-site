@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lightframer Pro — Beta Story</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #000; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 40px; }
+
+        /* Instagram Story: 1080x1920 ratio → rendered at 405x720 */
+        .story {
+            width: 405px;
+            height: 720px;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            background: #0D0D0D;
+        }
+
+        /* Animated background */
+        .story::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background:
+                radial-gradient(ellipse at 30% 20%, rgba(74,107,138,0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 60%, rgba(212,165,116,0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 90%, rgba(204,68,68,0.06) 0%, transparent 40%),
+                linear-gradient(170deg, #0D0D0D 0%, #12100a 40%, #0D0D0D 100%);
+        }
+
+        .content {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 28px 32px;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Top badge */
+        .top-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(212,165,116,0.1);
+            border: 1px solid rgba(212,165,116,0.2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            align-self: flex-start;
+        }
+        .top-badge .dot {
+            width: 6px; height: 6px;
+            background: #D4A574;
+            border-radius: 50%;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .top-badge span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            color: #D4A574;
+            letter-spacing: 2px;
+        }
+
+        /* App name */
+        .app-name {
+            font-family: 'Inter', sans-serif;
+            font-size: 36px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.5px;
+            line-height: 1.05;
+            margin-top: 24px;
+        }
+        .app-name .accent { color: #D4A574; }
+
+        .subtitle {
+            font-size: 15px;
+            color: #A0A0A0;
+            line-height: 1.5;
+            margin-top: 10px;
+        }
+
+        /* Sun arc illustration */
+        .sun-arc-wrap {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .sun-arc-wrap svg {
+            width: 100%;
+            max-width: 360px;
+        }
+
+        /* Feature pills */
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: auto;
+            margin-bottom: 20px;
+        }
+        .feat-pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            font-weight: 600;
+            color: #A0A0A0;
+            background: #1A1A1A;
+            padding: 6px 10px;
+            border-radius: 12px;
+            letter-spacing: 0.3px;
+        }
+        .feat-pill.highlight {
+            color: #D4A574;
+            background: rgba(212,165,116,0.1);
+            border: 1px solid rgba(212,165,116,0.15);
+        }
+
+        /* CTA */
+        .cta-section {
+            text-align: center;
+        }
+        .cta-box {
+            background: #D4A574;
+            color: #0D0D0D;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+            padding: 14px 0;
+            border-radius: 14px;
+            letter-spacing: 0.5px;
+            width: 100%;
+        }
+        .cta-sub {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: #8A8A8A;
+            margin-top: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Corner brackets */
+        .bracket { position: absolute; width: 24px; height: 24px; z-index: 3; }
+        .bracket.tl { top: 28px; left: 20px; border-top: 2px solid rgba(212,165,116,0.2); border-left: 2px solid rgba(212,165,116,0.2); }
+        .bracket.tr { top: 28px; right: 20px; border-top: 2px solid rgba(212,165,116,0.2); border-right: 2px solid rgba(212,165,116,0.2); }
+        .bracket.bl { bottom: 20px; left: 20px; border-bottom: 2px solid rgba(212,165,116,0.2); border-left: 2px solid rgba(212,165,116,0.2); }
+        .bracket.br { bottom: 20px; right: 20px; border-bottom: 2px solid rgba(212,165,116,0.2); border-right: 2px solid rgba(212,165,116,0.2); }
+
+        /* Viewfinder frame lines behind sun arc */
+        .vf-lines {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px; height: 126px;
+            border: 1px solid rgba(212,165,116,0.08);
+        }
+        .vf-lines::before {
+            content: '2.39 : 1';
+            position: absolute;
+            bottom: -16px; right: 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8px;
+            color: rgba(212,165,116,0.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="story">
+        <div class="bracket tl"></div>
+        <div class="bracket tr"></div>
+        <div class="bracket bl"></div>
+        <div class="bracket br"></div>
+
+        <div class="content">
+            <!-- Top -->
+            <div class="top-badge">
+                <div class="dot"></div>
+                <span>BETA INVITE</span>
+            </div>
+
+            <div class="app-name">
+                LIGHTFRAMER<br><span class="accent">PRO</span>
+            </div>
+            <p class="subtitle">A professional cinema viewfinder<br>with real-time sun path tracking.</p>
+
+            <!-- Sun arc in the middle -->
+            <div class="sun-arc-wrap">
+                <div class="vf-lines"></div>
+                <svg viewBox="0 0 360 160">
+                    <!-- Guide arc -->
+                    <path d="M 20 150 Q 180 -30 340 150" stroke="#D4A574" stroke-width="0.8" fill="none" opacity="0.15" stroke-dasharray="4 5"/>
+                    <!-- Traveled arc -->
+                    <path d="M 20 150 Q 180 -30 340 150" stroke="#E8C59B" stroke-width="1.5" fill="none" opacity="0.3" stroke-dasharray="350" stroke-dashoffset="140">
+                        <animate attributeName="stroke-dashoffset" from="500" to="140" dur="2s" fill="freeze"/>
+                    </path>
+                    <!-- Sun positions -->
+                    <circle cx="40" cy="120" r="3" fill="#4A6B8A" opacity="0.4"/>
+                    <circle cx="100" cy="48" r="3" fill="#C9A86C" opacity="0.5"/>
+                    <circle cx="180" cy="10" r="6" fill="#E8C59B" opacity="0.85">
+                        <animate attributeName="opacity" values="0.85;0.6;0.85" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="180" cy="10" r="16" fill="#E8C59B" opacity="0.05"/>
+                    <circle cx="260" cy="48" r="3" fill="#C9A86C" opacity="0.5"/>
+                    <circle cx="320" cy="120" r="3" fill="#CC4444" opacity="0.4"/>
+                    <!-- Horizon -->
+                    <line x1="0" y1="150" x2="360" y2="150" stroke="#262626" stroke-width="0.8"/>
+                    <!-- Time labels -->
+                    <text x="40" y="140" font-size="8" fill="#4A6B8A" text-anchor="middle" font-family="JetBrains Mono,monospace">6AM</text>
+                    <text x="180" y="30" font-size="8" fill="#D4A574" text-anchor="middle" font-family="JetBrains Mono,monospace" font-weight="700">NOON</text>
+                    <text x="320" y="140" font-size="8" fill="#CC4444" text-anchor="middle" font-family="JetBrains Mono,monospace">6PM</text>
+                </svg>
+            </div>
+
+            <!-- Feature pills -->
+            <div class="features">
+                <div class="feat-pill highlight">50+ CAMERAS</div>
+                <div class="feat-pill highlight">90+ LENSES</div>
+                <div class="feat-pill">SUN TRACKING</div>
+                <div class="feat-pill">GOLDEN HOUR</div>
+                <div class="feat-pill">FRAME LINES</div>
+                <div class="feat-pill">TIME SCRUBBER</div>
+                <div class="feat-pill">COMPASS</div>
+                <div class="feat-pill">WB METER</div>
+                <div class="feat-pill">METADATA EXPORT</div>
+            </div>
+
+            <!-- CTA -->
+            <div class="cta-section">
+                <div class="cta-box">Join the Beta →</div>
+                <div class="cta-sub">DM for TestFlight access · iOS only</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
