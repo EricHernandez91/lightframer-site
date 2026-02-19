@@ -354,7 +354,7 @@ function renderDetail(id) {
     </div>
     <table>
       <tr>
-        <th>✓</th><th>Name</th><th>Sensor (mm)</th><th>Aspect</th><th>Resolution</th><th>Max FPS</th><th>Crop</th><th>Source URL</th><th>Notes</th><th>Actions</th>
+        <th>✓</th><th>Name</th><th>Sensor (mm)</th><th>Aspect</th><th>Resolution</th><th>Crop</th><th>Source URL</th><th>Notes</th><th>Actions</th>
       </tr>
       ${cam.modes.map(m => {
         const cls = m.verified ? 'verified' : (m.notes ? 'flagged' : 'unverified');
@@ -371,7 +371,6 @@ function renderDetail(id) {
             <input class="inline-edit" value="${m.resolution_width}" onchange="updateModeNum('${m.id}','resolution_width',this.value)"> ×
             <input class="inline-edit" value="${m.resolution_height}" onchange="updateModeNum('${m.id}','resolution_height',this.value)">
           </td>
-          <td><input class="inline-edit" style="width:50px" value="${m.max_fps}" onchange="updateModeNum('${m.id}','max_fps',this.value)"></td>
           <td><input class="inline-edit" style="width:50px" value="${m.crop_factor}" onchange="updateModeNum('${m.id}','crop_factor',this.value)"></td>
           <td><input class="inline-edit inline-edit-wide" value="${m.source_url||''}" placeholder="URL..." onchange="updateModeField('${m.id}','source_url',this.value)"></td>
           <td><input class="inline-edit inline-edit-wide" value="${m.notes||''}" placeholder="Notes..." onchange="updateModeField('${m.id}','notes',this.value)"></td>
@@ -597,7 +596,6 @@ function showAddMode(camId) {
       <div class="form-group"><label>Sensor Height (mm)</label><input id="fm-sh" type="number" step="0.01"></div>
       <div class="form-group"><label>Res Width (px)</label><input id="fm-rw" type="number"></div>
       <div class="form-group"><label>Res Height (px)</label><input id="fm-rh" type="number"></div>
-      <div class="form-group"><label>Max FPS</label><input id="fm-fps" type="number"></div>
       <div class="form-group"><label>Crop Factor</label><input id="fm-crop" type="number" step="0.01" value="1.0"></div>
       <div class="form-group full"><label>Source URL</label><input id="fm-url"></div>
       <div class="form-group full"><label>Notes</label><textarea id="fm-notes"></textarea></div>
@@ -618,7 +616,6 @@ async function addMode(camId) {
     sensor_height: +document.getElementById('fm-sh').value,
     resolution_width: +document.getElementById('fm-rw').value,
     resolution_height: +document.getElementById('fm-rh').value,
-    max_fps: +document.getElementById('fm-fps').value,
     crop_factor: +document.getElementById('fm-crop').value,
     verified: false,
     source_url: document.getElementById('fm-url').value,
@@ -645,7 +642,6 @@ function showEditMode(modeId) {
       <div class="form-group"><label>Sensor Height (mm)</label><input id="fm-sh" type="number" step="0.01" value="${m.sensor_height}"></div>
       <div class="form-group"><label>Res Width (px)</label><input id="fm-rw" type="number" value="${m.resolution_width}"></div>
       <div class="form-group"><label>Res Height (px)</label><input id="fm-rh" type="number" value="${m.resolution_height}"></div>
-      <div class="form-group"><label>Max FPS</label><input id="fm-fps" type="number" value="${m.max_fps}"></div>
       <div class="form-group"><label>Crop Factor</label><input id="fm-crop" type="number" step="0.01" value="${m.crop_factor}"></div>
       <div class="form-group full"><label>Verified By</label><input id="fm-vby" value="${m.verified_by||''}"></div>
       <div class="form-group full"><label>Source URL</label><input id="fm-url" value="${m.source_url||''}"></div>
@@ -665,7 +661,6 @@ async function saveMode(modeId) {
     sensor_height: +document.getElementById('fm-sh').value,
     resolution_width: +document.getElementById('fm-rw').value,
     resolution_height: +document.getElementById('fm-rh').value,
-    max_fps: +document.getElementById('fm-fps').value,
     crop_factor: +document.getElementById('fm-crop').value,
     verified_by: document.getElementById('fm-vby').value,
     source_url: document.getElementById('fm-url').value,
@@ -680,11 +675,11 @@ async function saveMode(modeId) {
 
 // ---- CSV Export ----
 function exportCSV() {
-  let csv = 'Camera ID,Manufacturer,Model,Category,Mode ID,Mode Name,Sensor Width (mm),Sensor Height (mm),Aspect Ratio,Resolution Width,Resolution Height,Max FPS,Crop Factor,Camera Verified,Mode Verified,Verified By,Source URL,Camera Notes,Mode Notes\n';
+  let csv = 'Camera ID,Manufacturer,Model,Category,Mode ID,Mode Name,Sensor Width (mm),Sensor Height (mm),Aspect Ratio,Resolution Width,Resolution Height,Crop Factor,Camera Verified,Mode Verified,Verified By,Source URL,Camera Notes,Mode Notes\n';
   cameras.forEach(cam => {
     cam.modes.forEach(m => {
       const ar = aspectStr(m.sensor_width, m.sensor_height);
-      csv += `"${cam.id}","${cam.manufacturer}","${cam.model}","${cam.category}","${m.id}","${m.name}",${m.sensor_width},${m.sensor_height},"${ar}",${m.resolution_width},${m.resolution_height},${m.max_fps},${m.crop_factor},${cam.verified},${m.verified},"${m.verified_by||''}","${m.source_url||''}","${(cam.notes||'').replace(/"/g,'""')}","${(m.notes||'').replace(/"/g,'""')}"\n`;
+      csv += `"${cam.id}","${cam.manufacturer}","${cam.model}","${cam.category}","${m.id}","${m.name}",${m.sensor_width},${m.sensor_height},"${ar}",${m.resolution_width},${m.resolution_height},${m.crop_factor},${cam.verified},${m.verified},"${m.verified_by||''}","${m.source_url||''}","${(cam.notes||'').replace(/"/g,'""')}","${(m.notes||'').replace(/"/g,'""')}"\n`;
     });
   });
   const blob = new Blob([csv], { type: 'text/csv' });
