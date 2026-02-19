@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lightframer Pro — Camera Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg: #0d0d0d; --bg2: #161616; --bg3: #1e1e1e; --bg4: #282828;
+  --text: #e0e0e0; --text2: #888; --accent: #e8a84c; --accent2: #c4863a;
+  --red: #e05252; --green: #4caf50; --blue: #5c9ce6; --border: #333;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+#sidebar { width: 320px; min-width: 320px; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+#sidebar-header { padding: 16px; border-bottom: 1px solid var(--border); }
+#sidebar-header h1 { font-size: 14px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+#search { width: 100%; padding: 8px 12px; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; outline: none; }
+#search:focus { border-color: var(--accent); }
+#filter-bar { padding: 8px 16px; display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-btn { padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg3); color: var(--text2); font-size: 10px; cursor: pointer; text-transform: uppercase; }
+.filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(232,168,76,0.1); }
+#sidebar-actions { padding: 8px 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+#sidebar-stats { padding: 6px 16px; font-size: 11px; color: var(--text2); border-bottom: 1px solid var(--border); }
+#camera-list { flex: 1; overflow-y: auto; padding: 4px 0; }
+.mfg-group { margin-bottom: 2px; }
+.mfg-header { padding: 6px 16px; font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; user-select: none; display: flex; justify-content: space-between; }
+.mfg-header:hover { color: var(--accent); }
+.mfg-header .mfg-stats { font-weight: 400; }
+.cam-item { padding: 8px 16px 8px 28px; font-size: 13px; cursor: pointer; border-left: 3px solid transparent; transition: all .15s; display: flex; justify-content: space-between; align-items: center; }
+.cam-item:hover { background: var(--bg3); }
+.cam-item.active { background: var(--bg3); border-left-color: var(--accent); color: var(--accent); }
+.cam-item .cam-info { flex: 1; }
+.cam-item .cam-meta { font-size: 11px; color: var(--text2); }
+.cam-item .cam-status { font-size: 14px; }
+#main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+#content { flex: 1; overflow-y: auto; padding: 24px; }
+.btn { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg3); color: var(--text); font-size: 12px; cursor: pointer; transition: all .15s; }
+.btn:hover { background: var(--bg4); border-color: var(--accent); }
+.btn-primary { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+.btn-primary:hover { background: var(--accent2); }
+.btn-danger { border-color: var(--red); color: var(--red); }
+.btn-danger:hover { background: var(--red); color: #fff; }
+.btn-success { border-color: var(--green); color: var(--green); }
+.btn-success:hover { background: var(--green); color: #fff; }
+.btn-sm { padding: 4px 10px; font-size: 11px; }
+.cam-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+.cam-header h2 { font-size: 24px; font-weight: 600; }
+.cam-header .meta { color: var(--text2); font-size: 13px; margin-top: 4px; }
+.cam-props { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.prop { background: var(--bg3); padding: 12px; border-radius: 8px; }
+.prop label { font-size: 11px; color: var(--text2); text-transform: uppercase; display: block; margin-bottom: 4px; }
+.prop .val { font-size: 16px; font-weight: 500; }
+.verify-section { background: var(--bg3); border-radius: 8px; padding: 16px; margin-bottom: 24px; border: 1px solid var(--border); }
+.verify-section h4 { font-size: 13px; color: var(--accent); text-transform: uppercase; margin-bottom: 12px; }
+.verify-row { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+.verify-row label { font-size: 12px; color: var(--text2); min-width: 100px; }
+.verify-row input, .verify-row textarea { flex: 1; padding: 6px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); font-size: 12px; }
+.verify-row input:focus, .verify-row textarea:focus { outline: none; border-color: var(--accent); }
+.verify-row textarea { min-height: 50px; resize: vertical; font-family: inherit; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; padding: 8px 12px; color: var(--text2); font-size: 11px; text-transform: uppercase; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 2; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+tr:hover td { background: var(--bg3); }
+tr.verified td { border-left: 2px solid var(--green); }
+tr.unverified td { border-left: 2px solid var(--red); }
+tr.flagged td { background: rgba(232,168,76,0.06); border-left: 2px solid var(--accent); }
+td input.inline-edit { width: 70px; padding: 2px 4px; background: var(--bg); border: 1px solid var(--border); border-radius: 3px; color: var(--text); font-size: 12px; text-align: right; }
+td input.inline-edit:focus { border-color: var(--accent); outline: none; }
+td input.inline-edit-wide { width: 160px; text-align: left; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.modal { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 24px; min-width: 500px; max-width: 700px; max-height: 90vh; overflow-y: auto; }
+.modal h3 { font-size: 18px; margin-bottom: 16px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group label { font-size: 11px; color: var(--text2); text-transform: uppercase; }
+.form-group input, .form-group select, .form-group textarea { padding: 8px; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; font-family: inherit; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--accent); }
+.form-group textarea { min-height: 60px; resize: vertical; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+.badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+.badge-warn { background: rgba(232,168,76,0.2); color: var(--accent); }
+.badge-err { background: rgba(224,82,82,0.2); color: var(--red); }
+.badge-ok { background: rgba(76,175,80,0.2); color: var(--green); }
+.badge-info { background: rgba(92,156,230,0.2); color: var(--blue); }
+#toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; background: var(--bg3); border: 1px solid var(--accent); border-radius: 8px; color: var(--accent); font-size: 13px; opacity: 0; transition: opacity .3s; z-index: 200; pointer-events: none; }
+#toast.show { opacity: 1; }
+.empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text2); font-size: 16px; gap: 8px; }
+.empty .subtitle { font-size: 13px; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.aspect { color: var(--text2); font-size: 11px; }
+.sync-indicator { font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
+.sync-ok { background: rgba(76,175,80,0.2); color: var(--green); }
+.sync-saving { background: rgba(232,168,76,0.2); color: var(--accent); }
+.sync-err { background: rgba(224,82,82,0.2); color: var(--red); }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div id="sidebar-header">
+    <h1>🎬 Lightframer Pro — Camera Admin <span id="sync-status" class="sync-indicator sync-ok">● Synced</span></h1>
+    <input id="search" type="text" placeholder="Search cameras...">
+  </div>
+  <div id="filter-bar">
+    <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">All</button>
+    <button class="filter-btn" data-filter="unverified" onclick="setFilter('unverified')">❌ Unverified</button>
+    <button class="filter-btn" data-filter="verified" onclick="setFilter('verified')">✅ Verified</button>
+    <button class="filter-btn" data-filter="flagged" onclick="setFilter('flagged')">⚠️ Flagged</button>
+  </div>
+  <div id="sidebar-stats"></div>
+  <div id="sidebar-actions">
+    <button class="btn btn-primary btn-sm" onclick="showAddCamera()">+ Camera</button>
+    <button class="btn btn-sm" onclick="exportSwift()">⬆ Export Swift</button>
+    <button class="btn btn-sm" onclick="exportCSV()">📊 CSV</button>
+    <button class="btn btn-sm" onclick="load()">🔄 Refresh</button>
+  </div>
+  <div id="camera-list"></div>
+</div>
+
+<div id="main">
+  <div id="content">
+    <div class="empty">
+      <div>Loading from Supabase...</div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ---- Supabase Config ----
+const SUPABASE_URL = 'https://luanuwxjkbptkicozdsw.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1YW51d3hqa2JwdGtpY296ZHN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MzAwNTYsImV4cCI6MjA4NzEwNjA1Nn0.6X8m7FTghI4Mic4pxRzRg_NxC3O56JC4O-q05JPJWjQ';
+// Use service role for full access (admin panel only, not public)
+const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1YW51d3hqa2JwdGtpY296ZHN3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTUzMDA1NiwiZXhwIjoyMDg3MTA2MDU2fQ.h7dtSm66Bh4omfgOujILFX5QMCDQ2FLOOEFLrvmBVjo';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+
+let cameras = []; // [{...cam, modes: [...]}]
+let selectedId = null;
+let currentFilter = 'all';
+let saveTimeout = null;
+
+const MFG_LIST = ['ARRI','RED','Sony','Blackmagic','Canon','Panasonic','Panavision','DJI','Kinefinity','Z CAM','Nikon','Fujifilm','Freefly','Phantom','Film','AJA','Digital Bolex','Ikonoskop','Silicon Imaging','Weisscam','PS-Cam'];
+const CAT_LIST = ['Large Format','Full Frame','Vista Vision','Super 35','Medium Format','APS-C','Micro Four Thirds','Super 16','Film 35mm','Film 65mm','Film 16mm','Film 8mm'];
+const MOUNT_LIST = ['LPL','PL','EF','RF','E-mount','L-mount','Z','X','G','M','MFT','DJI DL','DJI DX','Panavision','Custom','N/A'];
+
+function syncStatus(state) {
+  const el = document.getElementById('sync-status');
+  if (state === 'ok') { el.className = 'sync-indicator sync-ok'; el.textContent = '● Synced'; }
+  else if (state === 'saving') { el.className = 'sync-indicator sync-saving'; el.textContent = '● Saving...'; }
+  else { el.className = 'sync-indicator sync-err'; el.textContent = '● Error'; }
+}
+
+function toast(msg, ms=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), ms);
+}
+
+// ---- Data Loading ----
+async function load() {
+  syncStatus('saving');
+  const { data: camRows, error: camErr } = await sb.from('cameras').select('*').order('manufacturer').order('model');
+  if (camErr) { syncStatus('err'); toast('Load error: ' + camErr.message); return; }
+
+  const { data: modeRows, error: modeErr } = await sb.from('sensor_modes').select('*').order('name');
+  if (modeErr) { syncStatus('err'); toast('Load error: ' + modeErr.message); return; }
+
+  // Group modes by camera
+  const modesByCamera = {};
+  modeRows.forEach(m => {
+    if (!modesByCamera[m.camera_id]) modesByCamera[m.camera_id] = [];
+    modesByCamera[m.camera_id].push(m);
+  });
+
+  cameras = camRows.map(c => ({
+    ...c,
+    modes: modesByCamera[c.id] || []
+  }));
+
+  syncStatus('ok');
+  renderSidebar();
+  renderStats();
+  if (selectedId) renderDetail(selectedId);
+  else document.getElementById('content').innerHTML = `<div class="empty"><div>Select a camera from the sidebar</div><div class="subtitle">${cameras.length} cameras · ${modeRows.length} sensor modes</div></div>`;
+}
+
+// ---- Stats ----
+function renderStats() {
+  const total = cameras.length;
+  const verified = cameras.filter(c => c.verified).length;
+  const flagged = cameras.filter(c => c.notes && c.notes.toLowerCase().includes('flag')).length;
+  const modes = cameras.reduce((s,c) => s + c.modes.length, 0);
+  const verifiedModes = cameras.reduce((s,c) => s + c.modes.filter(m => m.verified).length, 0);
+  document.getElementById('sidebar-stats').innerHTML = `
+    <strong>${verified}/${total}</strong> cameras verified · <strong>${verifiedModes}/${modes}</strong> modes verified
+    ${flagged ? ` · <span style="color:var(--accent)">${flagged} flagged</span>` : ''}
+  `;
+}
+
+// ---- Filter ----
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === f));
+  renderSidebar();
+}
+
+function filterCamera(c) {
+  if (currentFilter === 'verified') return c.verified;
+  if (currentFilter === 'unverified') return !c.verified;
+  if (currentFilter === 'flagged') return (c.notes && c.notes.toLowerCase().includes('flag')) || c.modes.some(m => m.notes && m.notes.toLowerCase().includes('flag'));
+  return true;
+}
+
+// ---- Sidebar ----
+function renderSidebar() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const groups = {};
+  cameras.filter(c => {
+    const s = `${c.manufacturer} ${c.model} ${c.id}`.toLowerCase();
+    return (!q || s.includes(q)) && filterCamera(c);
+  }).forEach(c => {
+    if (!groups[c.manufacturer]) groups[c.manufacturer] = [];
+    groups[c.manufacturer].push(c);
+  });
+
+  document.getElementById('camera-list').innerHTML = Object.entries(groups).sort((a,b) => a[0].localeCompare(b[0])).map(([mfg, cams]) => {
+    const vCount = cams.filter(c => c.verified).length;
+    return `<div class="mfg-group">
+      <div class="mfg-header">${mfg} <span class="mfg-stats">${vCount}/${cams.length} ✓</span></div>
+      ${cams.map(c => {
+        const modeV = c.modes.filter(m=>m.verified).length;
+        const status = c.verified ? '✅' : (c.notes ? '⚠️' : '❌');
+        return `<div class="cam-item ${c.id===selectedId?'active':''}" onclick="selectCamera('${c.id}')">
+          <div class="cam-info">${c.model}<div class="cam-meta">${c.modes.length} modes · ${modeV}/${c.modes.length} verified</div></div>
+          <div class="cam-status">${status}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('search').addEventListener('input', renderSidebar);
+
+function selectCamera(id) { selectedId = id; renderSidebar(); renderDetail(id); }
+
+function aspectStr(w, h) {
+  const r = w / h;
+  if (Math.abs(r - 16/9) < 0.03) return '16:9';
+  if (Math.abs(r - 17/9) < 0.03) return '17:9';
+  if (Math.abs(r - 2.39) < 0.05) return '2.39:1';
+  if (Math.abs(r - 2.0) < 0.05) return '2:1';
+  if (Math.abs(r - 4/3) < 0.03) return '4:3';
+  if (Math.abs(r - 3/2) < 0.03) return '3:2';
+  if (Math.abs(r - 1) < 0.03) return '1:1';
+  if (Math.abs(r - 5/4) < 0.03) return '5:4';
+  if (Math.abs(r - 6/5) < 0.03) return '6:5';
+  if (Math.abs(r - 8/9) < 0.03) return '8:9';
+  return r.toFixed(2) + ':1';
+}
+
+// ---- Detail ----
+function renderDetail(id) {
+  const cam = cameras.find(c => c.id === id);
+  if (!cam) return;
+  const content = document.getElementById('content');
+  content.innerHTML = `
+    <div class="cam-header">
+      <div>
+        <h2>${cam.manufacturer} ${cam.model}</h2>
+        <div class="meta">${cam.id} · ${cam.category} · ${cam.release_year || '—'} · Mount: ${cam.mount || '—'}</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-sm btn-success" onclick="toggleCameraVerified('${cam.id}')">${cam.verified ? '✅ Verified' : '☐ Mark Verified'}</button>
+        <button class="btn btn-sm" onclick="showEditCamera('${cam.id}')">✏ Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteCamera('${cam.id}')">🗑 Delete</button>
+      </div>
+    </div>
+
+    <div class="verify-section">
+      <h4>Verification</h4>
+      <div class="verify-row">
+        <label>Source URL</label>
+        <input value="${cam.source_url||''}" placeholder="Manufacturer spec page URL" onchange="updateCamField('${cam.id}','source_url',this.value)">
+      </div>
+      <div class="verify-row">
+        <label>Verified By</label>
+        <input value="${cam.verified_by||''}" placeholder="Your name" onchange="updateCamField('${cam.id}','verified_by',this.value)">
+      </div>
+      <div class="verify-row">
+        <label>Notes</label>
+        <textarea placeholder="Verification notes, issues found, etc." onchange="updateCamField('${cam.id}','notes',this.value)">${cam.notes||''}</textarea>
+      </div>
+    </div>
+
+    <div class="cam-props">
+      <div class="prop"><label>ISO Base</label><div class="val">${cam.iso_base || '—'}</div></div>
+      <div class="prop"><label>Dual ISO</label><div class="val">${cam.iso_dual_base || '—'}</div></div>
+      <div class="prop"><label>Dynamic Range</label><div class="val">${cam.dynamic_range ? cam.dynamic_range + ' stops' : '—'}</div></div>
+      <div class="prop"><label>Mount</label><div class="val">${cam.mount || '—'}</div></div>
+      <div class="prop"><label>Sensor Modes</label><div class="val">${cam.modes.length}</div></div>
+      <div class="prop"><label>Modes Verified</label><div class="val">${cam.modes.filter(m=>m.verified).length} / ${cam.modes.length}</div></div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <h3 style="font-size:16px">Sensor Modes</h3>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-sm btn-success" onclick="verifyAllModes('${cam.id}')">✅ Verify All</button>
+        <button class="btn btn-sm btn-primary" onclick="showAddMode('${cam.id}')">+ Add Mode</button>
+      </div>
+    </div>
+    <table>
+      <tr>
+        <th>✓</th><th>Name</th><th>Sensor (mm)</th><th>Aspect</th><th>Resolution</th><th>Max FPS</th><th>Crop</th><th>Source URL</th><th>Notes</th><th>Actions</th>
+      </tr>
+      ${cam.modes.map(m => {
+        const cls = m.verified ? 'verified' : (m.notes ? 'flagged' : 'unverified');
+        const ar = aspectStr(m.sensor_width, m.sensor_height);
+        return `<tr class="${cls}">
+          <td><input type="checkbox" ${m.verified?'checked':''} onchange="toggleModeVerified('${m.id}',this.checked)"></td>
+          <td><input class="inline-edit inline-edit-wide" value="${m.name}" onchange="updateModeField('${m.id}','name',this.value)"></td>
+          <td>
+            <input class="inline-edit" value="${m.sensor_width}" onchange="updateModeNum('${m.id}','sensor_width',this.value)"> ×
+            <input class="inline-edit" value="${m.sensor_height}" onchange="updateModeNum('${m.id}','sensor_height',this.value)">
+          </td>
+          <td><span class="aspect">${ar}</span></td>
+          <td>
+            <input class="inline-edit" value="${m.resolution_width}" onchange="updateModeNum('${m.id}','resolution_width',this.value)"> ×
+            <input class="inline-edit" value="${m.resolution_height}" onchange="updateModeNum('${m.id}','resolution_height',this.value)">
+          </td>
+          <td><input class="inline-edit" style="width:50px" value="${m.max_fps}" onchange="updateModeNum('${m.id}','max_fps',this.value)"></td>
+          <td><input class="inline-edit" style="width:50px" value="${m.crop_factor}" onchange="updateModeNum('${m.id}','crop_factor',this.value)"></td>
+          <td><input class="inline-edit inline-edit-wide" value="${m.source_url||''}" placeholder="URL..." onchange="updateModeField('${m.id}','source_url',this.value)"></td>
+          <td><input class="inline-edit inline-edit-wide" value="${m.notes||''}" placeholder="Notes..." onchange="updateModeField('${m.id}','notes',this.value)"></td>
+          <td>
+            <button class="btn btn-sm" onclick="showEditMode('${m.id}')">✏</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteMode('${cam.id}','${m.id}')">✕</button>
+          </td>
+        </tr>`;
+      }).join('')}
+    </table>
+  `;
+}
+
+// ---- Camera CRUD (Supabase) ----
+async function updateCamField(camId, field, value) {
+  syncStatus('saving');
+  const update = { [field]: value };
+  if (field === 'verified' && value) { update.verified_at = new Date().toISOString(); }
+  const { error } = await sb.from('cameras').update(update).eq('id', camId);
+  if (error) { syncStatus('err'); toast('Save error: ' + error.message); return; }
+  // Update local
+  const cam = cameras.find(c => c.id === camId);
+  if (cam) Object.assign(cam, update);
+  syncStatus('ok');
+}
+
+async function toggleCameraVerified(camId) {
+  const cam = cameras.find(c => c.id === camId);
+  const newVal = !cam.verified;
+  syncStatus('saving');
+  const update = { verified: newVal, verified_at: newVal ? new Date().toISOString() : null };
+  const { error } = await sb.from('cameras').update(update).eq('id', camId);
+  if (error) { syncStatus('err'); toast('Error: ' + error.message); return; }
+  cam.verified = newVal;
+  cam.verified_at = update.verified_at;
+  syncStatus('ok');
+  renderDetail(camId); renderSidebar(); renderStats();
+  toast(newVal ? 'Camera verified ✅' : 'Camera unverified');
+}
+
+async function deleteCamera(id) {
+  if (!confirm(`Delete camera ${id} and all its modes?`)) return;
+  syncStatus('saving');
+  const { error } = await sb.from('cameras').delete().eq('id', id);
+  if (error) { syncStatus('err'); toast('Error: ' + error.message); return; }
+  cameras = cameras.filter(c => c.id !== id);
+  selectedId = null;
+  syncStatus('ok');
+  document.getElementById('content').innerHTML = '<div class="empty">Select a camera</div>';
+  renderSidebar(); renderStats();
+  toast('Camera deleted');
+}
+
+// ---- Mode CRUD (Supabase) ----
+async function updateModeField(modeId, field, value) {
+  syncStatus('saving');
+  const { error } = await sb.from('sensor_modes').update({ [field]: value }).eq('id', modeId);
+  if (error) { syncStatus('err'); toast('Save error: ' + error.message); return; }
+  // Update local
+  for (const c of cameras) {
+    const m = c.modes.find(m => m.id === modeId);
+    if (m) { m[field] = value; break; }
+  }
+  syncStatus('ok');
+}
+
+async function updateModeNum(modeId, field, value) {
+  const num = parseFloat(value);
+  await updateModeField(modeId, field, num);
+  if (selectedId) renderDetail(selectedId); // refresh aspect ratios
+}
+
+async function toggleModeVerified(modeId, checked) {
+  syncStatus('saving');
+  const update = { verified: checked, verified_at: checked ? new Date().toISOString() : null };
+  const { error } = await sb.from('sensor_modes').update(update).eq('id', modeId);
+  if (error) { syncStatus('err'); toast('Error: ' + error.message); return; }
+  for (const c of cameras) {
+    const m = c.modes.find(m => m.id === modeId);
+    if (m) { Object.assign(m, update); break; }
+  }
+  syncStatus('ok');
+  renderStats(); renderSidebar();
+}
+
+async function verifyAllModes(camId) {
+  const cam = cameras.find(c => c.id === camId);
+  const allVerified = cam.modes.every(m => m.verified);
+  const newVal = !allVerified;
+  syncStatus('saving');
+  const modeIds = cam.modes.map(m => m.id);
+  const update = { verified: newVal, verified_at: newVal ? new Date().toISOString() : null };
+  const { error } = await sb.from('sensor_modes').update(update).in('id', modeIds);
+  if (error) { syncStatus('err'); toast('Error: ' + error.message); return; }
+  cam.modes.forEach(m => Object.assign(m, update));
+  syncStatus('ok');
+  renderDetail(camId); renderSidebar(); renderStats();
+  toast(newVal ? 'All modes verified ✅' : 'All modes unverified');
+}
+
+async function deleteMode(camId, modeId) {
+  const cam = cameras.find(c => c.id === camId);
+  const mode = cam.modes.find(m => m.id === modeId);
+  if (!confirm(`Delete mode "${mode.name}"?`)) return;
+  syncStatus('saving');
+  const { error } = await sb.from('sensor_modes').delete().eq('id', modeId);
+  if (error) { syncStatus('err'); toast('Error: ' + error.message); return; }
+  cam.modes = cam.modes.filter(m => m.id !== modeId);
+  syncStatus('ok');
+  renderDetail(camId); renderStats(); renderSidebar();
+  toast('Mode deleted');
+}
+
+// ---- Modals ----
+function showModal(html) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `<div class="modal">${html}</div>`;
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  return overlay;
+}
+function closeModal() { document.querySelector('.modal-overlay')?.remove(); }
+
+function showAddCamera() {
+  showModal(`
+    <h3>Add Camera</h3>
+    <div class="form-grid">
+      <div class="form-group"><label>ID</label><input id="f-id" placeholder="brand_model"></div>
+      <div class="form-group"><label>Manufacturer</label><select id="f-mfg">${MFG_LIST.map(m=>`<option>${m}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Model</label><input id="f-model"></div>
+      <div class="form-group"><label>Category</label><select id="f-cat">${CAT_LIST.map(c=>`<option>${c}</option>`).join('')}</select></div>
+      <div class="form-group"><label>ISO Base</label><input id="f-iso" type="number" value="800"></div>
+      <div class="form-group"><label>Dual ISO</label><input id="f-dualiso" type="number" placeholder="Optional"></div>
+      <div class="form-group"><label>Dynamic Range</label><input id="f-dr" type="number" step="0.1" value="14.0"></div>
+      <div class="form-group"><label>Mount</label><select id="f-mount">${MOUNT_LIST.map(m=>`<option>${m}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Release Year</label><input id="f-year" type="number" value="2024"></div>
+      <div class="form-group full"><label>Source URL</label><input id="f-url" placeholder="Manufacturer spec page"></div>
+      <div class="form-group full"><label>Notes</label><textarea id="f-notes"></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addCamera()">Add</button>
+    </div>
+  `);
+}
+
+async function addCamera() {
+  const cam = {
+    id: document.getElementById('f-id').value,
+    manufacturer: document.getElementById('f-mfg').value,
+    model: document.getElementById('f-model').value,
+    category: document.getElementById('f-cat').value,
+    iso_base: +document.getElementById('f-iso').value || null,
+    iso_dual_base: document.getElementById('f-dualiso').value ? +document.getElementById('f-dualiso').value : null,
+    dynamic_range: +document.getElementById('f-dr').value || null,
+    mount: document.getElementById('f-mount').value,
+    release_year: +document.getElementById('f-year').value || null,
+    verified: false,
+    source_url: document.getElementById('f-url').value,
+    notes: document.getElementById('f-notes').value
+  };
+  if (!cam.id || !cam.model) return toast('ID and Model required');
+  syncStatus('saving');
+  const { error } = await sb.from('cameras').insert(cam);
+  if (error) { syncStatus('err'); toast('Error: ' + error.message); return; }
+  syncStatus('ok');
+  closeModal(); toast('Camera added');
+  await load(); selectCamera(cam.id);
+}
+
+function showEditCamera(id) {
+  const cam = cameras.find(c => c.id === id);
+  showModal(`
+    <h3>Edit Camera</h3>
+    <div class="form-grid">
+      <div class="form-group"><label>ID</label><input id="f-id" value="${cam.id}" readonly style="opacity:0.5"></div>
+      <div class="form-group"><label>Manufacturer</label><select id="f-mfg">${MFG_LIST.map(m=>`<option ${m===cam.manufacturer?'selected':''}>${m}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Model</label><input id="f-model" value="${cam.model}"></div>
+      <div class="form-group"><label>Category</label><select id="f-cat">${CAT_LIST.map(c=>`<option ${c===cam.category?'selected':''}>${c}</option>`).join('')}</select></div>
+      <div class="form-group"><label>ISO Base</label><input id="f-iso" type="number" value="${cam.iso_base||''}"></div>
+      <div class="form-group"><label>Dual ISO</label><input id="f-dualiso" type="number" value="${cam.iso_dual_base||''}"></div>
+      <div class="form-group"><label>Dynamic Range</label><input id="f-dr" type="number" step="0.1" value="${cam.dynamic_range||''}"></div>
+      <div class="form-group"><label>Mount</label><select id="f-mount">${MOUNT_LIST.map(m=>`<option ${m===cam.mount?'selected':''}>${m}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Release Year</label><input id="f-year" type="number" value="${cam.release_year||''}"></div>
+      <div class="form-group full"><label>Source URL</label><input id="f-url" value="${cam.source_url||''}"></div>
+      <div class="form-group full"><label>Notes</label><textarea id="f-notes">${cam.notes||''}</textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCamera('${cam.id}')">Save</button>
+    </div>
+  `);
+}
+
+async function saveCamera(id) {
+  const update = {
+    manufacturer: document.getElementById('f-mfg').value,
+    model: document.getElementById('f-model').value,
+    category: document.getElementById('f-cat').value,
+    iso_base: +document.getElementById('f-iso').value || null,
+    iso_dual_base: document.getElementById('f-dualiso').value ? +document.getElementById('f-dualiso').value : null,
+    dynamic_range: +document.getElementById('f-dr').value || null,
+    mount: document.getElementById('f-mount').value,
+    release_year: +document.getElementById('f-year').value || null,
+    source_url: document.getElementById('f-url').value,
+    notes: document.getElementById('f-notes').value,
+  };
+  syncStatus('saving');
+  const { error } = await sb.from('cameras').update(update).eq('id', id);
+  if (error) { syncStatus('err'); toast('Error: ' + error.message); return; }
+  syncStatus('ok');
+  closeModal(); toast('Camera saved'); await load();
+}
+
+function showAddMode(camId) {
+  showModal(`
+    <h3>Add Sensor Mode</h3>
+    <div class="form-grid">
+      <div class="form-group full"><label>ID</label><input id="fm-id" placeholder="cameraId_modeName"></div>
+      <div class="form-group full"><label>Name</label><input id="fm-name"></div>
+      <div class="form-group"><label>Sensor Width (mm)</label><input id="fm-sw" type="number" step="0.01"></div>
+      <div class="form-group"><label>Sensor Height (mm)</label><input id="fm-sh" type="number" step="0.01"></div>
+      <div class="form-group"><label>Res Width (px)</label><input id="fm-rw" type="number"></div>
+      <div class="form-group"><label>Res Height (px)</label><input id="fm-rh" type="number"></div>
+      <div class="form-group"><label>Max FPS</label><input id="fm-fps" type="number"></div>
+      <div class="form-group"><label>Crop Factor</label><input id="fm-crop" type="number" step="0.01" value="1.0"></div>
+      <div class="form-group full"><label>Source URL</label><input id="fm-url"></div>
+      <div class="form-group full"><label>Notes</label><textarea id="fm-notes"></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addMode('${camId}')">Add</button>
+    </div>
+  `);
+}
+
+async function addMode(camId) {
+  const mode = {
+    id: document.getElementById('fm-id').value,
+    camera_id: camId,
+    name: document.getElementById('fm-name').value,
+    sensor_width: +document.getElementById('fm-sw').value,
+    sensor_height: +document.getElementById('fm-sh').value,
+    resolution_width: +document.getElementById('fm-rw').value,
+    resolution_height: +document.getElementById('fm-rh').value,
+    max_fps: +document.getElementById('fm-fps').value,
+    crop_factor: +document.getElementById('fm-crop').value,
+    verified: false,
+    source_url: document.getElementById('fm-url').value,
+    notes: document.getElementById('fm-notes').value
+  };
+  if (!mode.id || !mode.name) return toast('ID and Name required');
+  syncStatus('saving');
+  const { error } = await sb.from('sensor_modes').insert(mode);
+  if (error) { syncStatus('err'); toast('Error: ' + error.message); return; }
+  syncStatus('ok');
+  closeModal(); toast('Mode added'); await load();
+}
+
+function showEditMode(modeId) {
+  let m;
+  for (const c of cameras) { m = c.modes.find(x => x.id === modeId); if (m) break; }
+  if (!m) return;
+  showModal(`
+    <h3>Edit Sensor Mode</h3>
+    <div class="form-grid">
+      <div class="form-group full"><label>ID</label><input id="fm-id" value="${m.id}" readonly style="opacity:0.5"></div>
+      <div class="form-group full"><label>Name</label><input id="fm-name" value="${m.name}"></div>
+      <div class="form-group"><label>Sensor Width (mm)</label><input id="fm-sw" type="number" step="0.01" value="${m.sensor_width}"></div>
+      <div class="form-group"><label>Sensor Height (mm)</label><input id="fm-sh" type="number" step="0.01" value="${m.sensor_height}"></div>
+      <div class="form-group"><label>Res Width (px)</label><input id="fm-rw" type="number" value="${m.resolution_width}"></div>
+      <div class="form-group"><label>Res Height (px)</label><input id="fm-rh" type="number" value="${m.resolution_height}"></div>
+      <div class="form-group"><label>Max FPS</label><input id="fm-fps" type="number" value="${m.max_fps}"></div>
+      <div class="form-group"><label>Crop Factor</label><input id="fm-crop" type="number" step="0.01" value="${m.crop_factor}"></div>
+      <div class="form-group full"><label>Verified By</label><input id="fm-vby" value="${m.verified_by||''}"></div>
+      <div class="form-group full"><label>Source URL</label><input id="fm-url" value="${m.source_url||''}"></div>
+      <div class="form-group full"><label>Notes</label><textarea id="fm-notes">${m.notes||''}</textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMode('${m.id}')">Save</button>
+    </div>
+  `);
+}
+
+async function saveMode(modeId) {
+  const update = {
+    name: document.getElementById('fm-name').value,
+    sensor_width: +document.getElementById('fm-sw').value,
+    sensor_height: +document.getElementById('fm-sh').value,
+    resolution_width: +document.getElementById('fm-rw').value,
+    resolution_height: +document.getElementById('fm-rh').value,
+    max_fps: +document.getElementById('fm-fps').value,
+    crop_factor: +document.getElementById('fm-crop').value,
+    verified_by: document.getElementById('fm-vby').value,
+    source_url: document.getElementById('fm-url').value,
+    notes: document.getElementById('fm-notes').value
+  };
+  syncStatus('saving');
+  const { error } = await sb.from('sensor_modes').update(update).eq('id', modeId);
+  if (error) { syncStatus('err'); toast('Error: ' + error.message); return; }
+  syncStatus('ok');
+  closeModal(); toast('Mode saved'); await load();
+}
+
+// ---- CSV Export ----
+function exportCSV() {
+  let csv = 'Camera ID,Manufacturer,Model,Category,Mode ID,Mode Name,Sensor Width (mm),Sensor Height (mm),Aspect Ratio,Resolution Width,Resolution Height,Max FPS,Crop Factor,Camera Verified,Mode Verified,Verified By,Source URL,Camera Notes,Mode Notes\n';
+  cameras.forEach(cam => {
+    cam.modes.forEach(m => {
+      const ar = aspectStr(m.sensor_width, m.sensor_height);
+      csv += `"${cam.id}","${cam.manufacturer}","${cam.model}","${cam.category}","${m.id}","${m.name}",${m.sensor_width},${m.sensor_height},"${ar}",${m.resolution_width},${m.resolution_height},${m.max_fps},${m.crop_factor},${cam.verified},${m.verified},"${m.verified_by||''}","${m.source_url||''}","${(cam.notes||'').replace(/"/g,'""')}","${(m.notes||'').replace(/"/g,'""')}"\n`;
+    });
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'lightframer-cameras.csv'; a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV exported!');
+}
+
+// ---- Swift Export ----
+async function exportSwift() {
+  toast('Generating Swift...');
+  try {
+    const r = await fetch('/api/export', { method: 'POST' });
+    const data = await r.json();
+    if (data.error) return toast('Export failed: ' + data.error);
+    toast(data.message || 'Swift file generated!');
+  } catch(e) { toast('Export failed: ' + e.message); }
+}
+
+// ---- Init ----
+load();
+</script>
+</body>
+</html>
