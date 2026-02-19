@@ -101,10 +101,16 @@ td input.inline-edit-wide { width: 160px; text-align: left; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 .aspect { color: var(--text2); font-size: 11px; }
-.sync-indicator { font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
+.sync-indicator { font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; transition: all .3s; }
 .sync-ok { background: rgba(76,175,80,0.2); color: var(--green); }
-.sync-saving { background: rgba(232,168,76,0.2); color: var(--accent); }
-.sync-err { background: rgba(224,82,82,0.2); color: var(--red); }
+.sync-saving { background: rgba(232,168,76,0.3); color: var(--accent); animation: pulse 1s infinite; }
+.sync-err { background: rgba(224,82,82,0.3); color: var(--red); }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+#save-bar { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 999; transition: opacity .3s; opacity: 0; pointer-events: none; }
+#save-bar.saving { opacity: 1; background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent)); background-size: 200% 100%; animation: saveSlide 1s linear infinite; }
+#save-bar.saved { opacity: 1; background: var(--green); animation: none; }
+#save-bar.error { opacity: 1; background: var(--red); animation: none; }
+@keyframes saveSlide { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 </style>
 </head>
 <body>
@@ -117,6 +123,7 @@ td input.inline-edit-wide { width: 160px; text-align: left; }
 </div>
 
 <div id="app">
+<div id="save-bar"></div>
 <div id="sidebar">
   <div id="sidebar-header">
     <h1>🎬 Lightframer Pro — Camera Admin <span id="sync-status" class="sync-indicator sync-ok">● Synced</span></h1>
@@ -150,32 +157,6 @@ td input.inline-edit-wide { width: 160px; text-align: left; }
 </div><!-- end #app -->
 
 <script>
-// ---- Auth ----
-const PASS_HASH = '073d1c96a79049eea0de55f71d1f13c58ac8a6b9ce4f6cb67e100b5f6837008d';
-async function sha256(msg) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
-  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
-}
-async function tryAuth() {
-  const pw = document.getElementById('pw-input').value;
-  const hash = await sha256(pw);
-  if (hash === PASS_HASH) {
-    sessionStorage.setItem('lf-auth', '1');
-    showApp();
-  } else {
-    document.getElementById('pw-error').textContent = 'Incorrect password';
-  }
-}
-document.getElementById('pw-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryAuth(); });
-function showApp() {
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('app').classList.add('visible');
-  load();
-}
-if (sessionStorage.getItem('lf-auth')) showApp();
-</script>
-
-<script>
 // ---- Supabase Config ----
 const SUPABASE_URL = 'https://luanuwxjkbptkicozdsw.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1YW51d3hqa2JwdGtpY296ZHN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1MzAwNTYsImV4cCI6MjA4NzEwNjA1Nn0.6X8m7FTghI4Mic4pxRzRg_NxC3O56JC4O-q05JPJWjQ';
@@ -193,11 +174,23 @@ const MFG_LIST = ['ARRI','RED','Sony','Blackmagic','Canon','Panasonic','Panavisi
 const CAT_LIST = ['Large Format','Full Frame','Vista Vision','Super 35','Medium Format','APS-C','Micro Four Thirds','Super 16','Film 35mm','Film 65mm','Film 16mm','Film 8mm'];
 const MOUNT_LIST = ['LPL','PL','EF','RF','E-mount','L-mount','Z','X','G','M','MFT','DJI DL','DJI DX','Panavision','Custom','N/A'];
 
+let saveBarTimeout;
 function syncStatus(state) {
   const el = document.getElementById('sync-status');
-  if (state === 'ok') { el.className = 'sync-indicator sync-ok'; el.textContent = '● Synced'; }
-  else if (state === 'saving') { el.className = 'sync-indicator sync-saving'; el.textContent = '● Saving...'; }
-  else { el.className = 'sync-indicator sync-err'; el.textContent = '● Error'; }
+  const bar = document.getElementById('save-bar');
+  clearTimeout(saveBarTimeout);
+  if (state === 'ok') {
+    el.className = 'sync-indicator sync-ok'; el.textContent = '● Saved';
+    bar.className = 'saved';
+    saveBarTimeout = setTimeout(() => { bar.className = ''; }, 2000);
+  } else if (state === 'saving') {
+    el.className = 'sync-indicator sync-saving'; el.textContent = '● Saving...';
+    bar.className = 'saving';
+  } else {
+    el.className = 'sync-indicator sync-err'; el.textContent = '● Error';
+    bar.className = 'error';
+    saveBarTimeout = setTimeout(() => { bar.className = ''; }, 5000);
+  }
 }
 
 function toast(msg, ms=2500) {
@@ -712,7 +705,31 @@ async function exportSwift() {
   } catch(e) { toast('Export failed: ' + e.message); }
 }
 
-// ---- Init (triggered by auth) ----
+// ---- Auth ----
+const PASS_HASH = '073d1c96a79049eea0de55f71d1f13c58ac8a6b9ce4f6cb67e100b5f6837008d';
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
+}
+async function tryAuth() {
+  const pw = document.getElementById('pw-input').value;
+  const hash = await sha256(pw);
+  if (hash === PASS_HASH) {
+    sessionStorage.setItem('lf-auth', '1');
+    showApp();
+  } else {
+    document.getElementById('pw-error').textContent = 'Incorrect password';
+  }
+}
+document.getElementById('pw-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryAuth(); });
+function showApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  load();
+}
+
+// ---- Init ----
+if (sessionStorage.getItem('lf-auth')) showApp();
 </script>
 </body>
 </html>
