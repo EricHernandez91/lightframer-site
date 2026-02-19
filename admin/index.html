@@ -12,7 +12,15 @@
   --text: #e0e0e0; --text2: #888; --accent: #e8a84c; --accent2: #c4863a;
   --red: #e05252; --green: #4caf50; --blue: #5c9ce6; --border: #333;
 }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; }
+#auth-screen { display: flex; align-items: center; justify-content: center; height: 100vh; flex-direction: column; gap: 16px; }
+#auth-screen h1 { font-size: 18px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; }
+#auth-screen input { padding: 12px 20px; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 16px; width: 300px; text-align: center; }
+#auth-screen input:focus { outline: none; border-color: var(--accent); }
+#auth-screen .error { color: var(--red); font-size: 13px; min-height: 20px; }
+#auth-screen button { padding: 10px 32px; background: var(--accent); color: #000; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+#app { display: none; height: 100vh; overflow: hidden; }
+#app.visible { display: flex; }
 #sidebar { width: 320px; min-width: 320px; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
 #sidebar-header { padding: 16px; border-bottom: 1px solid var(--border); }
 #sidebar-header h1 { font-size: 14px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
@@ -101,6 +109,14 @@ td input.inline-edit-wide { width: 160px; text-align: left; }
 </head>
 <body>
 
+<div id="auth-screen">
+  <h1>🎬 Lightframer Pro Admin</h1>
+  <input id="pw-input" type="password" placeholder="Enter password" autofocus>
+  <div class="error" id="pw-error"></div>
+  <button onclick="tryAuth()">Enter</button>
+</div>
+
+<div id="app">
 <div id="sidebar">
   <div id="sidebar-header">
     <h1>🎬 Lightframer Pro — Camera Admin <span id="sync-status" class="sync-indicator sync-ok">● Synced</span></h1>
@@ -131,6 +147,33 @@ td input.inline-edit-wide { width: 160px; text-align: left; }
 </div>
 
 <div id="toast"></div>
+</div><!-- end #app -->
+
+<script>
+// ---- Auth ----
+const PASS_HASH = '073d1c96a79049eea0de55f71d1f13c58ac8a6b9ce4f6cb67e100b5f6837008d';
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
+}
+async function tryAuth() {
+  const pw = document.getElementById('pw-input').value;
+  const hash = await sha256(pw);
+  if (hash === PASS_HASH) {
+    sessionStorage.setItem('lf-auth', '1');
+    showApp();
+  } else {
+    document.getElementById('pw-error').textContent = 'Incorrect password';
+  }
+}
+document.getElementById('pw-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryAuth(); });
+function showApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  load();
+}
+if (sessionStorage.getItem('lf-auth')) showApp();
+</script>
 
 <script>
 // ---- Supabase Config ----
@@ -669,8 +712,7 @@ async function exportSwift() {
   } catch(e) { toast('Export failed: ' + e.message); }
 }
 
-// ---- Init ----
-load();
+// ---- Init (triggered by auth) ----
 </script>
 </body>
 </html>
